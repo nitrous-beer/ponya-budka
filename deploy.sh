@@ -6,10 +6,119 @@ DATA_DIR="/var/lib/budka"
 SERVICE_FILE="/etc/systemd/system/budka-api.service"
 NGINX_FILE="/etc/nginx/sites-available/budka.conf"
 SSL_DIR="/etc/nginx/ssl"
+BACKUP_DIR="/var/backups/budka"
+STATE_FILE="$DATA_DIR/install-state"
+NGINX_DEFAULT_WAS_ENABLED=0
+NGINX_DEFAULT_TARGET=""
+
+UNINSTALL=0
+UNINSTALL_YES=0
+for arg in "$@"; do
+  case "$arg" in
+    --uninstall) UNINSTALL=1 ;;
+    --yes) UNINSTALL_YES=1 ;;
+    -h|--help)
+      cat <<'EOF_HELP'
+Поняшина будка
+
+Установка:
+  sudo bash deploy.sh
+
+Полное удаление только компонентов Поняшиной будки:
+  sudo bash deploy.sh --uninstall
+  sudo bash deploy.sh --uninstall --yes
+
+Удаление НЕ деинсталлирует системные Node.js, Nginx, curl, OpenSSL, UFW
+или другие пакеты, которые могли быть установлены до Поняшиной будки.
+EOF_HELP
+      exit 0
+      ;;
+    *)
+      echo "ERROR: неизвестный аргумент: $arg" >&2
+      exit 2
+      ;;
+  esac
+done
+
 
 if [ "$(id -u)" -ne 0 ]; then
   echo "ERROR: запустите скрипт от root, например: curl -sSL <raw-url> | sudo bash" >&2
   exit 1
+fi
+
+# -----------------------------------------------------------------------------
+# Uninstall mode: remove ONLY files/services created for Поняшина будка.
+# Never apt-remove shared/system packages here.
+# -----------------------------------------------------------------------------
+if [ "$UNINSTALL" -eq 1 ]; then
+  if [ "$UNINSTALL_YES" -ne 1 ]; then
+    echo "Будут удалены данные и компоненты Поняшиной будки:"
+    echo "  - $APP_DIR"
+    echo "  - $DATA_DIR"
+    echo "  - $BACKUP_DIR"
+    echo "  - $SERVICE_FILE"
+    echo "  - $NGINX_FILE и ссылка sites-enabled/budka.conf"
+    echo "  - $SSL_DIR/budka.crt и $SSL_DIR/budka.key"
+    echo
+    echo "Системные Node.js/Nginx/curl/OpenSSL/UFW и чужие сайты удаляться НЕ будут."
+    printf 'Для подтверждения введите DELETE BUDKA: '
+    read -r confirmation
+    if [ "$confirmation" != "DELETE BUDKA" ]; then
+      echo "Отмена."
+      exit 0
+    fi
+  fi
+
+  UFW_ADDED_80=0
+  UFW_ADDED_9443=0
+  NGINX_DEFAULT_WAS_ENABLED=0
+  NGINX_DEFAULT_TARGET=""
+  if [ -f "$STATE_FILE" ]; then
+    # shellcheck disable=SC1090
+    . "$STATE_FILE"
+  fi
+
+  echo "==> Остановка и удаление API"
+  systemctl disable --now budka-api.service 2>/dev/null || true
+  rm -f "$SERVICE_FILE"
+  systemctl daemon-reload
+
+  echo "==> Удаление конфигурации Nginx Будки"
+  rm -f /etc/nginx/sites-enabled/budka.conf "$NGINX_FILE"
+  if [ "$NGINX_DEFAULT_WAS_ENABLED" = "1" ] && [ -n "$NGINX_DEFAULT_TARGET" ]; then
+    ln -sfn "$NGINX_DEFAULT_TARGET" /etc/nginx/sites-enabled/default
+  elif [ "$NGINX_DEFAULT_WAS_ENABLED" = "1" ] && [ -f /etc/nginx/sites-available/default ]; then
+    ln -sfn /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
+  fi
+  rm -f "$SSL_DIR/budka.crt" "$SSL_DIR/budka.key"
+  rmdir "$SSL_DIR" 2>/dev/null || true
+
+  if command -v nginx >/dev/null 2>&1; then
+    if nginx -t >/dev/null 2>&1; then
+      systemctl reload nginx 2>/dev/null || systemctl restart nginx 2>/dev/null || true
+    else
+      echo "WARNING: Nginx config after удаления Будки не прошла проверку; Nginx не перезапущен." >&2
+    fi
+  fi
+
+  echo "==> Удаление данных, приложения и бэкапов Будки"
+  rm -rf "$APP_DIR" "$DATA_DIR" "$BACKUP_DIR"
+
+  # Remove firewall rules only when this installation recorded that it created them.
+  # Existing rules are deliberately preserved.
+  if command -v ufw >/dev/null 2>&1; then
+    if [ "$UFW_ADDED_80" = "1" ]; then ufw delete allow 80/tcp >/dev/null 2>&1 || true; fi
+    if [ "$UFW_ADDED_9443" = "1" ]; then ufw delete allow 9443/tcp >/dev/null 2>&1 || true; fi
+  fi
+
+  echo
+  echo "============================================================"
+  echo "  ПОНЯШИНА БУДКА — УДАЛЕНИЕ ЗАВЕРШЕНО"
+  echo "============================================================"
+  echo "Удалены только компоненты проекта, его данные и конфигурация."
+  echo "Системные пакеты и сторонние сайты/сервисы НЕ удалялись."
+  echo "============================================================"
+  exit 0
 fi
 
 export DEBIAN_FRONTEND=noninteractive
@@ -60,7 +169,6 @@ case "$GITHUB_RAW_BASE" in
 esac
 
 TMP_DIR="$(mktemp -d /tmp/budka-deploy.XXXXXX)"
-BACKUP_DIR="/var/backups/budka"
 cleanup() { rm -rf "$TMP_DIR"; }
 trap cleanup EXIT
 
@@ -146,14 +254,44 @@ for data_file in "$DATA_DIR/books.json" "$DATA_DIR/users.json"; do
 done
 
 # Enable this site and disable the distro default to avoid conflicting server blocks.
+# Remember whether the default site was enabled so uninstall can restore it.
+if [ -L /etc/nginx/sites-enabled/default ] || [ -e /etc/nginx/sites-enabled/default ]; then
+  NGINX_DEFAULT_WAS_ENABLED=1
+  if [ -L /etc/nginx/sites-enabled/default ]; then
+    NGINX_DEFAULT_TARGET="$(readlink /etc/nginx/sites-enabled/default || true)"
+  fi
+fi
 ln -sfn "$NGINX_FILE" /etc/nginx/sites-enabled/budka.conf
 rm -f /etc/nginx/sites-enabled/default
 
 # UFW: add rules if UFW exists, but do not force-enable it and risk SSH lockout.
-if command -v ufw >/dev/null 2>&1; then
-  ufw allow 80/tcp >/dev/null || true
-  ufw allow 9443/tcp >/dev/null || true
+# Preserve ownership information across redeploys.
+UFW_ADDED_80=0
+UFW_ADDED_9443=0
+if [ -f "$STATE_FILE" ]; then
+  # shellcheck disable=SC1090
+  . "$STATE_FILE"
 fi
+if command -v ufw >/dev/null 2>&1; then
+  if ! ufw status 2>/dev/null | grep -Eq '^80/tcp[[:space:]]+ALLOW'; then
+    ufw allow 80/tcp >/dev/null || true
+    UFW_ADDED_80=1
+  fi
+  if ! ufw status 2>/dev/null | grep -Eq '^9443/tcp[[:space:]]+ALLOW'; then
+    ufw allow 9443/tcp >/dev/null || true
+    UFW_ADDED_9443=1
+  fi
+fi
+
+cat > "$STATE_FILE" <<EOF_STATE
+# Budka installer state. Used only to safely undo changes created by this install.
+UFW_ADDED_80=$UFW_ADDED_80
+UFW_ADDED_9443=$UFW_ADDED_9443
+NGINX_DEFAULT_WAS_ENABLED=$NGINX_DEFAULT_WAS_ENABLED
+NGINX_DEFAULT_TARGET=${NGINX_DEFAULT_TARGET@Q}
+EOF_STATE
+chmod 0640 "$STATE_FILE"
+chown www-data:www-data "$STATE_FILE"
 
 # Validate Nginx configuration before restarting services.
 echo "==> Проверка Nginx"
