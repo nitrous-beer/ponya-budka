@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="description" content="Поняшина будка — серверная электронная библиотека и читалка">
+  <meta name="description" content="Поняшина будка — серверная электронная читалка">
   <title>Поняшина будка</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,109 +14,59 @@
 <body data-theme="classic">
   <canvas id="petals" aria-hidden="true"></canvas>
   <div class="scanlines" aria-hidden="true"></div>
-
   <header class="topbar">
     <a class="brand" href="#catalog" aria-label="Поняшина будка">
       <span class="logo" aria-hidden="true">
-        <svg viewBox="0 0 44 44" width="44" height="44"><rect x="1" y="1" width="42" height="42" rx="11" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 13h24v18H10zM14 17h16M14 22h16M14 27h10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M29 27l4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <svg viewBox="0 0 44 44" width="44" height="44" role="img">
+          <rect x="1" y="1" width="42" height="42" rx="10" fill="none" stroke="currentColor" stroke-width="2"/>
+          <path d="M10 13h24v18H10zM14 17h16M14 22h16M14 27h10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <path d="M29 27l4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
       </span>
-      <span class="brand-copy"><strong>Поняшина будка</strong><small>Книги. Миры. Приключения.</small></span>
+      <span class="brand-copy"><strong>Поняшина будка</strong><small>электронная читалка</small></span>
     </a>
-
-    <nav class="main-nav" aria-label="Основная навигация">
-      <button class="nav-btn active" id="catalogNav" type="button"><i class="fa-solid fa-house"></i><span>Каталог</span></button>
-      <button class="nav-btn admin-only" id="writeBtn" type="button"><i class="fa-solid fa-pen"></i><span>Написать</span></button>
-      <button class="nav-btn" id="aperitifBtn" type="button"><i class="fa-solid fa-dice"></i><span>Аперитив</span></button>
-      <button class="nav-btn admin-only" id="adminNav" type="button"><i class="fa-solid fa-gear"></i><span>Пользователи</span></button>
+    <nav class="actions" aria-label="Основная навигация">
+      <button id="writeBtn" class="btn admin-only" type="button" title="Написать"><i class="fa-solid fa-pen-to-square"></i><span>Написать</span></button>
+      <button id="aperitifBtn" class="btn" type="button" title="Аперитив"><i class="fa-solid fa-wand-magic-sparkles"></i><span>Аперитив</span></button>
+      <button id="themeBtn" class="btn" type="button" title="Тема"><i class="fa-solid fa-palette"></i><span>Тема</span></button>
+      <button id="profileBtn" class="btn icon-only-mobile" type="button" title="Профиль"><i class="fa-solid fa-user"></i><span>Профиль</span></button>
     </nav>
-
-    <div class="top-actions">
-      <button class="icon-btn" id="mobileSearchBtn" type="button" title="Поиск"><i class="fa-solid fa-magnifying-glass"></i></button>
-      <button class="icon-btn" id="themeBtn" type="button" title="Сменить тему"><i class="fa-solid fa-palette"></i></button>
-      <button class="profile-chip" id="profileBtn" type="button" title="Профиль"><span class="avatar"><i class="fa-solid fa-user"></i></span><span class="profile-name">Гость</span><i class="fa-solid fa-chevron-down"></i></button>
-    </div>
   </header>
-  <div id="mobileSearchBar" class="mobile-search-bar"><i class="fa-solid fa-magnifying-glass"></i><input id="mobileSearchInput" type="search" placeholder="Поиск книг..." autocomplete="off"><button id="closeMobileSearch" type="button"><i class="fa-solid fa-xmark"></i></button></div>
 
-  <main id="app" class="app-layout">
-    <aside class="sidebar left-sidebar" aria-label="Библиотека">
-      <div class="sidebar-title"><span><i class="fa-solid fa-book-open"></i> Библиотека</span></div>
-      <label class="search-box"><i class="fa-solid fa-magnifying-glass"></i><input id="searchBooks" type="search" placeholder="Поиск книг..." autocomplete="off"></label>
-      <div class="category-list" id="categoryList">
-        <button class="category active" data-category="all">Все</button>
-        <button class="category" data-category="fantasy">Фантастика</button>
-        <button class="category" data-category="fantasy2">Фэнтези</button>
-        <button class="category" data-category="adventure">Приключения</button>
-        <button class="category" data-category="other">Другое</button>
-      </div>
-      <div id="libraryList" class="library-list"></div>
-      <div class="library-footer"><span>Всего книг: <b id="bookCount">0</b></span><button id="writeBtnSide" class="btn primary admin-only"><i class="fa-solid fa-pen"></i> Написать</button></div>
-    </aside>
-
-    <section class="content-column">
-      <section id="catalog" class="view active">
-        <div class="catalog-head">
-          <div><p class="eyebrow">ARCHIVE // ONLINE</p><h1>Каталог книг</h1><p>Твоя библиотека всегда загружается с сервера.</p></div>
-          <div id="geiger" class="geiger" hidden><i class="fa-solid fa-radiation"></i><span>0.38 mSv/h</span></div>
-        </div>
-        <div id="bookGrid" class="book-grid" aria-live="polite"></div>
-      </section>
-
-      <section id="reader" class="view" aria-label="Читалка">
-        <div class="reader-head">
-          <button id="backBtn" class="soft-btn"><i class="fa-solid fa-arrow-left"></i><span>Назад</span></button>
-          <div class="reader-book"><div class="mini-cover" id="readerCover">Б</div><div><strong id="readerBookTitle">Книга</strong><span id="pageLabel">Страница 1 из 1</span></div></div>
-          <div class="reader-tools"><button id="bookmarkBtn" class="icon-btn" title="Закладка"><i class="fa-regular fa-bookmark"></i></button><button id="readerSoundBtn" class="icon-btn" title="Звук"><i class="fa-solid fa-volume-high"></i></button><button id="fullscreenBtn" class="icon-btn" title="Полный экран"><i class="fa-solid fa-expand"></i></button></div>
-        </div>
-        <div class="progress"><span id="progressBar"></span></div>
-        <div id="bookStage" class="book-stage"><article class="page" id="pageA"></article><article class="page" id="pageB"></article></div>
-        <div class="reader-controls-bottom"><button id="prevBtn" class="soft-btn"><i class="fa-solid fa-chevron-left"></i><span>Назад</span></button><input id="pageSlider" type="range" min="0" max="0" value="0" aria-label="Страница"><button id="nextBtn" class="soft-btn"><span>Вперёд</span><i class="fa-solid fa-chevron-right"></i></button></div>
-        <div class="bookmark-panel"><strong><i class="fa-solid fa-bookmark"></i> Закладки</strong><span id="bookmarkState">У вас пока нет закладок</span><button id="bookmarkBottomBtn" class="soft-btn"><i class="fa-regular fa-bookmark"></i> Создать закладку</button></div>
-        <div id="radioLine" class="radio-line"></div>
-      </section>
-
-      <section id="admin" class="view">
-        <div class="catalog-head"><div><p class="eyebrow">ADMIN // CONTROL</p><h1>Панель управления</h1><p>Пользователи и библиотека управляются через защищённый API.</p></div></div>
-        <div class="admin-grid"><div class="panel"><h2>Пользователи</h2><div id="userTable"></div></div><div class="panel"><h2>Системная информация</h2><p>API: <code>/api</code></p><p>Хранилище книг: <code>/var/lib/budka/books.json</code></p><p>Сессии: HttpOnly cookie, 12 часов.</p></div></div>
-      </section>
+  <main id="app" class="shell">
+    <section id="catalog" class="view active">
+      <div class="hero"><div><p class="eyebrow">ARCHIVE // ONLINE</p><h1>Каталог книг</h1><p>Текущая библиотека загружается с сервера — очистка кэша браузера её не стирает.</p></div><div id="geiger" class="geiger" hidden><i class="fa-solid fa-radiation"></i><span>0.38 mSv/h</span></div></div>
+      <div id="bookGrid" class="book-grid" aria-live="polite"></div>
     </section>
 
-    <aside class="sidebar right-sidebar" aria-label="Настройки чтения">
-      <div class="sidebar-title"><span><i class="fa-solid fa-palette"></i> Темы оформления</span></div>
-      <div class="theme-list">
-        <button class="theme-choice" data-set-theme="stalker"><i class="fa-solid fa-radiation"></i><span>S.T.A.L.K.E.R. КПК</span></button>
-        <button class="theme-choice" data-set-theme="skyrim"><i class="fa-solid fa-dragon"></i><span>TES Skyrim</span></button>
-        <button class="theme-choice" data-set-theme="anime"><i class="fa-solid fa-fan"></i><span>Аниме / Ранобэ</span></button>
-        <button class="theme-choice" data-set-theme="comic"><i class="fa-solid fa-burst"></i><span>Комикс / Pop-Art</span></button>
-        <button class="theme-choice" data-set-theme="classic"><i class="fa-solid fa-book"></i><span>Классика</span></button>
-        <button class="theme-choice" data-set-theme="night"><i class="fa-solid fa-moon"></i><span>Ночной режим</span></button>
-      </div>
-      <div class="side-section">
-        <button class="side-section-head" type="button" id="displayOptionsBtn"><span><i class="fa-solid fa-sliders"></i> Конфигурация</span><i class="fa-solid fa-chevron-down"></i></button>
-        <div class="display-options">
-          <label>Показывать заголовок <input class="toggle" type="checkbox" checked></label>
-          <label>Показывать автора <input class="toggle" type="checkbox" checked></label>
-          <label>Показывать прогресс <input class="toggle" type="checkbox" checked></label>
+    <section id="reader" class="view" aria-label="Читалка">
+      <div class="reader-toolbar">
+        <button id="backBtn" class="btn"><i class="fa-solid fa-arrow-left"></i><span>Каталог</span></button>
+        <div class="reader-title"><strong id="readerBookTitle">Книга</strong><span id="pageLabel">1 / 1</span></div>
+        <div class="reader-controls">
+          <button id="bookmarkBtn" class="btn" title="Закладка"><i class="fa-regular fa-bookmark"></i><span>Закладка</span></button>
+          <button id="prevBtn" class="btn" title="Назад"><i class="fa-solid fa-chevron-left"></i></button>
+          <button id="nextBtn" class="btn" title="Вперёд"><i class="fa-solid fa-chevron-right"></i></button>
         </div>
       </div>
-      <div class="aperitif-card">
-        <div class="aperitif-head"><strong><i class="fa-solid fa-dice"></i> Аперитив</strong><button id="closeAperitifSide" class="icon-btn" type="button"><i class="fa-solid fa-xmark"></i></button></div>
-        <div class="aperitif-tabs"><button class="active">Магический шар</button><button>Кубики</button></div>
-        <div class="dice-buttons"><button id="roll2d6" class="soft-btn"><i class="fa-solid fa-dice"></i> 2d6</button><button id="rollD20" class="soft-btn"><i class="fa-solid fa-dice-d20"></i> d20</button></div>
-        <button id="askBall" class="btn primary full"><i class="fa-solid fa-shuffle"></i> Бросить</button>
-        <div class="side-result" id="sideDiceResult">Результат: 7</div>
-        <div id="magicBall" class="magic-ball compact"><span id="magicAnswer">8</span></div>
-        <div id="die1" class="die side-die">6</div><div id="die2" class="die side-die">6</div><div id="diceResult" class="dice-result">—</div>
-      </div>
-    </aside>
-  </main>
+      <div class="progress"><span id="progressBar"></span></div>
+      <div id="bookStage" class="book-stage"><article class="page" id="pageA"></article><article class="page" id="pageB"></article></div>
+      <div class="reader-footer"><span id="bookmarkState"><i class="fa-regular fa-bookmark"></i> Закладка не установлена</span><span id="radioLine"></span></div>
+    </section>
 
-  <nav class="mobile-nav" aria-label="Мобильная навигация"><button id="mobileCatalogBtn"><i class="fa-solid fa-house"></i><span>Каталог</span></button><button id="mobileAperitifBtn"><i class="fa-solid fa-dice"></i><span>Аперитив</span></button><button id="mobileThemeBtn"><i class="fa-solid fa-palette"></i><span>Тема</span></button><button id="mobileProfileBtn"><i class="fa-solid fa-user"></i><span>Профиль</span></button></nav>
+    <section id="admin" class="view">
+      <div class="hero"><div><p class="eyebrow">ADMIN // CONTROL</p><h1>Панель управления</h1><p>Пользователи и библиотека управляются через защищённый API.</p></div></div>
+      <div class="admin-grid"><div class="panel"><h2>Пользователи</h2><div id="userTable"></div></div><div class="panel"><h2>Системная информация</h2><p>API: <code>/api</code></p><p>Хранилище книг: <code>/var/lib/budka/books.json</code></p><p>Сессии: HttpOnly cookie, 12 часов.</p></div></div>
+    </section>
+  </main>
 
   <div id="profileModal" class="modal" hidden><div class="modal-card"><button class="modal-close" data-close="profileModal"><i class="fa-solid fa-xmark"></i></button><h2><i class="fa-solid fa-user"></i> Профиль</h2><div id="profileContent"></div></div></div>
   <div id="loginModal" class="modal" hidden><div class="modal-card narrow"><button class="modal-close" data-close="loginModal"><i class="fa-solid fa-xmark"></i></button><h2><i class="fa-solid fa-right-to-bracket"></i> Вход</h2><form id="loginForm" class="form"><label>Логин<input name="username" autocomplete="username" required></label><label>Пароль<input name="password" type="password" autocomplete="current-password" required></label><button class="btn primary" type="submit"><i class="fa-solid fa-right-to-bracket"></i> Войти</button><p class="hint">Первичный администратор: <code>admin</code> / <code>admin</code>. После входа откройте профиль и смените пароль.</p><p id="loginError" class="error"></p></form><hr><h3>Регистрация</h3><form id="registerForm" class="form"><label>Логин<input name="username" required minlength="3"></label><label>Пароль<input name="password" type="password" required minlength="8"></label><button class="btn" type="submit"><i class="fa-solid fa-user-plus"></i> Создать читателя</button></form></div></div>
+
   <div id="bookModal" class="modal" hidden><div class="modal-card wide"><button class="modal-close" data-close="bookModal"><i class="fa-solid fa-xmark"></i></button><h2 id="bookFormTitle"><i class="fa-solid fa-pen-to-square"></i> Новая книга</h2><form id="bookForm" class="form"><input type="hidden" name="id"><label>Название<input name="title" maxlength="200" required></label><label>Автор<input name="author" maxlength="120"></label><label>Описание<textarea name="description" rows="3" maxlength="1000"></textarea></label><label>Текст книги<textarea name="content" rows="18" required></textarea></label><div class="form-actions"><button type="button" class="btn" data-close="bookModal">Отмена</button><button class="btn primary" type="submit"><i class="fa-solid fa-floppy-disk"></i> Сохранить</button></div></form></div></div>
-  <div id="aperitifModal" class="modal" hidden><div class="modal-card wide"><button class="modal-close" data-close="aperitifModal"><i class="fa-solid fa-xmark"></i></button><h2><i class="fa-solid fa-dice"></i> Аперитив</h2><div class="aperitif-grid"><section class="aperitif-box"><h3>Магический Шар №8</h3><div class="magic-ball"><span>8</span></div><button class="btn primary" id="askBallModal"><i class="fa-solid fa-shuffle"></i> Спросить</button></section><section class="aperitif-box"><h3>Игральные кубики</h3><div class="dice-row"><div class="die">6</div><div class="die">6</div></div><div class="dice-result">—</div></section></div></div></div>
+
+  <div id="aperitifModal" class="modal" hidden><div class="modal-card wide"><button class="modal-close" data-close="aperitifModal"><i class="fa-solid fa-xmark"></i></button><h2><i class="fa-solid fa-wand-magic-sparkles"></i> Аперитив</h2><div class="aperitif-grid"><section class="aperitif-box"><h3>Магический Шар №8</h3><div id="magicBall" class="magic-ball"><span id="magicAnswer">8</span></div><button id="askBall" class="btn primary"><i class="fa-solid fa-shuffle"></i> Спросить</button></section><section class="aperitif-box"><h3>Игральные кубики</h3><div class="dice-row"><div id="die1" class="die">6</div><div id="die2" class="die">6</div></div><div class="dice-result" id="diceResult">—</div><div class="dice-buttons"><button id="roll2d6" class="btn primary"><i class="fa-solid fa-dice"></i> 2d6</button><button id="rollD20" class="btn"><i class="fa-solid fa-dice-d20"></i> d20</button></div></section></div></div></div>
+
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="/app.js" defer></script>
 </body>
