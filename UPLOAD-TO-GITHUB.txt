@@ -1,0 +1,13 @@
+ПОНЯШИНА БУДКА — исправления для GitHub
+
+Заменить в корне репозитория nitrous-beer/ponya-budka на ветке main только эти файлы:
+- server.js
+- app.js
+- index.html
+- deploy.sh
+
+Не заменять остальные файлы. style.css, budka.conf, budka-api.service, README.md и .gitignore оставить как есть.
+
+После замены создать commit, например: Fix login roles, password change, d20 and first-run data initialization
+
+Перед запуском установки убедиться, что commit уже находится в main.
