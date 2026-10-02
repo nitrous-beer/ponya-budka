@@ -87,7 +87,6 @@ echo "==> Проверка загруженных файлов"
 /usr/bin/node --check "$TMP_DIR/app.js"
 grep -q '<!doctype html' "$TMP_DIR/index.html"
 grep -q 'server {' "$TMP_DIR/budka.conf"
-grep -q 'budka-api.service' "$TMP_DIR/budka-api.service"
 
 # Validate that the service points to the deployed application path.
 grep -q 'ExecStart=/usr/bin/node /var/www/budka/server.js' "$TMP_DIR/budka-api.service"
@@ -140,7 +139,11 @@ chown -R www-data:www-data "$APP_DIR" "$DATA_DIR"
 find "$APP_DIR" -type d -exec chmod 0755 {} +
 find "$APP_DIR" -type f -exec chmod 0644 {} +
 chmod 0750 "$DATA_DIR"
-chmod 0640 "$DATA_DIR/books.json" "$DATA_DIR/users.json"
+for data_file in "$DATA_DIR/books.json" "$DATA_DIR/users.json"; do
+  if [ -f "$data_file" ]; then
+    chmod 0640 "$data_file"
+  fi
+done
 
 # Enable this site and disable the distro default to avoid conflicting server blocks.
 ln -sfn "$NGINX_FILE" /etc/nginx/sites-enabled/budka.conf
