@@ -177,6 +177,23 @@ async function api(req, res) {
     return send(res, 201, { user: publicUser(user) });
   }
 
+  if (method === 'POST' && p === '/api/auth/password') {
+    const user = auth(req, res, false); if (!user) return;
+    const body = await jsonBody(req).catch(e => { fail(res, e.status || 400, e.message); return null; });
+    if (!body) return;
+    const currentPassword = String(body.currentPassword || '');
+    const newPassword = String(body.newPassword || '');
+    if (!verifyPassword(currentPassword, user.password)) return fail(res, 401, 'Текущий пароль указан неверно');
+    if (newPassword.length < 8 || newPassword.length > 200) return fail(res, 400, 'Новый пароль: от 8 до 200 символов');
+    const users = readJson(USERS_FILE, []);
+    const i = users.findIndex(u => u.id === user.id);
+    if (i < 0) return fail(res, 404, 'Пользователь не найден');
+    const salt = crypto.randomBytes(16).toString('hex');
+    const hash = crypto.scryptSync(newPassword, salt, 64).toString('hex');
+    users[i].password = `${salt}:${hash}`;
+    writeJsonAtomic(USERS_FILE, users);
+    return send(res, 200, { ok: true });
+  }
   if (method === 'POST' && p === '/api/books') {
     const user = auth(req, res, true); if (!user) return;
     const body = await jsonBody(req).catch(e => { fail(res, e.status || 400, e.message); return null; }); if (!body) return;

@@ -120,13 +120,8 @@ install -m 0644 "$TMP_DIR/budka.conf" "$NGINX_FILE"
 # -----------------------------------------------------------------------------
 # Persistent server-side storage. NEVER fetch these files from GitHub.
 # -----------------------------------------------------------------------------
-touch "$DATA_DIR/books.json" "$DATA_DIR/users.json"
-if [ ! -s "$DATA_DIR/books.json" ]; then
-  printf '[]\n' > "$DATA_DIR/books.json"
-fi
-if [ ! -s "$DATA_DIR/users.json" ]; then
-  printf '[]\n' > "$DATA_DIR/users.json"
-fi
+# The API initializes books.json/users.json on first start.
+# Do not create empty files here, otherwise the demo book would be skipped.
 
 # Self-signed certificate with the real public IP in SAN, valid for 365 days.
 if [ ! -s "$SSL_DIR/budka.crt" ] || [ ! -s "$SSL_DIR/budka.key" ]; then
