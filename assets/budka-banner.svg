@@ -1,1 +1,24 @@
-assets/budka-banner.svg
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="420" viewBox="0 0 1400 420">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#17120e"/>
+      <stop offset="50%" stop-color="#2b1f16"/>
+      <stop offset="100%" stop-color="#0d0b09"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#c49a55"/>
+      <stop offset="50%" stop-color="#f1d49a"/>
+      <stop offset="100%" stop-color="#9d7337"/>
+    </linearGradient>
+  </defs>
+  <rect width="1400" height="420" rx="28" fill="url(#bg)"/>
+  <rect x="24" y="24" width="1352" height="372" rx="22" fill="none" stroke="#8e6a3b" stroke-width="2" opacity=".7"/>
+  <path d="M70 310 H1330" stroke="#8e6a3b" opacity=".35"/>
+  <path d="M90 90 H1310" stroke="#8e6a3b" opacity=".2"/>
+  <text x="700" y="165" text-anchor="middle" fill="url(#gold)" font-family="Georgia,serif" font-size="82" font-weight="700">ПОНЯШИНА БУДКА</text>
+  <text x="700" y="225" text-anchor="middle" fill="#d8c7ad" font-family="Arial,sans-serif" font-size="26" letter-spacing="5">ЭЛЕКТРОННАЯ БИБЛИОТЕКА • КНИГИ • ЧТЕНИЕ</text>
+  <text x="700" y="285" text-anchor="middle" fill="#a99275" font-family="Arial,sans-serif" font-size="19">Vanilla HTML5 · CSS3 · JavaScript · Node.js · Nginx</text>
+  <circle cx="700" cy="345" r="5" fill="#c49a55"/>
+  <circle cx="675" cy="345" r="3" fill="#8e6a3b"/>
+  <circle cx="725" cy="345" r="3" fill="#8e6a3b"/>
+</svg>
