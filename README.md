@@ -1,95 +1,242 @@
-# Поняшина будка
+<div align="center">
 
-Веб-читалка с Vanilla JS SPA, Node.js API, Nginx и серверным JSON-хранилищем.
+# 📚 Поняшина будка
 
-## GitHub как источник кода
+### Локальная электронная библиотека с атмосферным интерфейсом и настоящим перелистыванием страниц
 
-`deploy.sh` не содержит копии `server.js`, `index.html`, CSS/JS и конфигураций. При запуске он загружает их из GitHub во временный каталог, проверяет и только после этого устанавливает.
+<img src="assets/budka-banner.svg" alt="Поняшина будка" width="100%"/>
 
-В `deploy.sh` перед публикацией укажите:
+<p>
+  <img src="https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white" alt="HTML5"/>
+  <img src="https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white" alt="CSS3"/>
+  <img src="https://img.shields.io/badge/JavaScript-vanilla-F7DF1E?style=for-the-badge&logo=javascript&logoColor=111" alt="Vanilla JS"/>
+  <img src="https://img.shields.io/badge/Node.js-API-339933?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js"/>
+  <img src="https://img.shields.io/badge/Nginx-HTTPS-009639?style=for-the-badge&logo=nginx&logoColor=white" alt="Nginx"/>
+</p>
 
-```bash
-GITHUB_OWNER="nitrous-beer"
-GITHUB_REPO="ponya-budka"
-GITHUB_REF="main"
-```
+<p>
+  <b>Без сборщика.</b> Без базы данных. Без внешнего CDN для изображений.<br/>
+  Один deploy-скрипт — и библиотека готова работать на чистом Ubuntu/Debian.
+</p>
 
-`GITHUB_REF` можно указать как branch, tag или полный commit SHA. Для максимально воспроизводимого production deploy рекомендуется фиксировать commit SHA.
+</div>
 
-## Установка одной командой
+---
 
-После `git push`:
+## ✨ Что это
 
-```bash
-curl -sSL https://raw.githubusercontent.com/nitrous-beer/ponya-budka/main/deploy.sh | sudo bash
-```
+**Поняшина будка** — небольшой self-hosted ридер и библиотека для домашнего сервера.
 
-Никакой предварительной установки Git или скачивания архива на сервер вручную не требуется.
+Интерфейс рассчитан на чтение книг прямо в браузере: на компьютере используются две страницы с эффектом перелистывания, на мобильном — удобный одностраничный режим.
 
-## Что загружается из GitHub
+### 🎨 Темы
 
-- `server.js`
-- `index.html`
-- `style.css`
-- `app.js`
-- `budka-api.service`
-- `budka.conf`
+- ☢️ **STALKER PDA**
+- 🐉 **Skyrim**
+- 🌸 **Anime / Light Novel**
+- 💥 **Comic / Pop-Art**
+- 📜 **Classic Sepia**
+- 🌙 **Night**
 
-Файлы сначала попадают в `/tmp/budka-deploy.*`, проходят базовую валидацию, затем устанавливаются.
+### 📖 Возможности ридера
 
-## Что НЕ загружается из GitHub
+- двухстраничный режим на desktop;
+- одностраничный режим на mobile;
+- перелистывание страниц;
+- прогресс чтения;
+- закладки;
+- звуки перелистывания через Web Audio;
+- адаптивная вёрстка;
+- Font Awesome-иконки;
+- никаких обязательных внешних изображений.
 
-Runtime-данные хранятся отдельно:
+### 🎲 Маленькие пасхалки
 
-- `/var/lib/budka/books.json`
-- `/var/lib/budka/users.json`
+В интерфейсе есть **Magic 8 Ball** и броски кубиков **2d6 / d20**.
 
-Повторный deploy их не перезаписывает. Поэтому книги и пользователи переживают обновление кода и очистку кэша браузера.
+---
 
-## Обновление
+## 🔐 Пользователи и права
 
-Изменить код → commit → push → снова выполнить:
+| Роль | Возможности |
+|---|---|
+| 👤 Гость | Просмотр доступных книг |
+| 📖 Reader | Чтение, профиль, смена собственного пароля |
+| 👑 Admin | Всё выше + создание, редактирование и удаление книг; управление пользователями |
 
-```bash
-curl -sSL https://raw.githubusercontent.com/nitrous-beer/ponya-budka/main/deploy.sh | sudo bash
-```
-
-Перед заменой текущего приложения создаётся архив в:
+Первичный аккаунт администратора:
 
 ```text
-/var/backups/budka/
+Логин: admin
+Пароль: admin
 ```
 
-## Сервер
+> ⚠️ После первой установки обязательно смените пароль через профиль администратора.
 
-- Nginx: `80` и `9443`
-- Node.js API: `127.0.0.1:3000`
-- systemd: `budka-api.service`
-- frontend: `/var/www/budka`
-- data: `/var/lib/budka`
-- SSL: `/etc/nginx/ssl/`
+Пароли хранятся не в открытом виде: используется `scrypt` с солью.
 
-HTTP перенаправляется на HTTPS `:9443`.
+---
 
-## Администратор
+## 🚀 Установка
 
-При первом запуске API создаёт `admin / admin`, если администратора ещё нет. После первого входа bootstrap-пароль необходимо сменить перед публичной эксплуатацией.
+Проект рассчитан на чистый **Ubuntu/Debian**.
 
-## HTTPS
+```bash
+sudo apt update
+sudo apt install -y git
+git clone https://github.com/nitrous-beer/ponya-budka.git
+cd ponya-budka
+sudo bash deploy.sh
+```
 
-Создаётся самоподписанный сертификат на 365 дней с публичным IP в SAN. Для доступа по IP без доменного имени браузер покажет предупреждение о недоверенном сертификате — это ожидаемое поведение self-signed TLS.
+После установки приложение будет доступно по:
 
-## Структура
+```text
+https://ВАШ_PUBLIC_IP:9443
+```
+
+Для self-signed сертификата браузер покажет предупреждение о сертификате — это ожидаемо.
+
+### Что делает `deploy.sh`
+
+1. устанавливает необходимые пакеты;
+2. проверяет Node.js;
+3. загружает актуальные файлы проекта;
+4. создаёт self-signed SSL-сертификат с IP в SAN;
+5. настраивает Nginx;
+6. создаёт systemd-сервис API;
+7. запускает Node.js API;
+8. проверяет Nginx и health endpoint.
+
+---
+
+## 🧩 Архитектура
+
+```text
+                         ┌─────────────────────┐
+                         │      Браузер        │
+                         │  SPA HTML/CSS/JS    │
+                         └──────────┬──────────┘
+                                    │ HTTPS :9443
+                                    ▼
+                         ┌─────────────────────┐
+                         │        Nginx        │
+                         │  static + reverse   │
+                         │       proxy         │
+                         └───────┬─────┬───────┘
+                                 │     │
+                         static  │     │ /api/*
+                                 ▼     ▼
+                         /var/www/   Node.js :3000
+                           budka       │
+                                       ▼
+                              /var/lib/budka/
+                              ├─ books.json
+                              └─ users.json
+```
+
+### Стек
+
+- **Frontend:** HTML5 + CSS3 + Vanilla JavaScript
+- **Backend:** Node.js HTTP API
+- **Storage:** JSON-файлы
+- **Web server:** Nginx
+- **Process manager:** systemd
+- **TLS:** OpenSSL
+- **Icons:** Font Awesome CDN
+- **Fonts:** Google Fonts
+
+---
+
+## 📁 Структура проекта
 
 ```text
 ponya-budka/
-├── deploy.sh
-├── server.js
-├── index.html
-├── style.css
-├── app.js
-├── budka-api.service
-├── budka.conf
+├── app.js                 # клиентская логика SPA
+├── index.html             # интерфейс
+├── style.css              # темы и адаптивная вёрстка
+│
+├── server.js              # Node.js API
+├── budka-api.service      # systemd unit
+├── budka.conf             # конфигурация Nginx
+├── deploy.sh              # установка одной командой
+│
+├── assets/
+│   └── budka-banner.svg   # оформление GitHub README
+│
 ├── .gitignore
 └── README.md
 ```
+
+---
+
+## 🗃️ Данные
+
+Сервер хранит данные в:
+
+```text
+/var/lib/budka/books.json
+/var/lib/budka/users.json
+```
+
+Файлы создаются API автоматически при первом запуске.
+
+---
+
+## 🛡️ Безопасность
+
+Проект рассчитан прежде всего на небольшой self-hosted сервер.
+
+Уже предусмотрены:
+
+- HTTP → HTTPS redirect;
+- `HttpOnly` + `Secure` + `SameSite=Strict` cookie;
+- хеширование паролей через `scrypt`;
+- ограничение попыток входа;
+- проверка прав администратора на сервере;
+- серверное хранение книг и пользователей;
+- Nginx reverse proxy;
+- systemd для запуска API.
+
+> Если библиотека будет открыта непосредственно в интернет, рекомендуется дополнительно использовать firewall, VPN или reverse proxy с полноценным публичным TLS-сертификатом.
+
+---
+
+## 🧪 Проверка перед публикацией
+
+Для Node.js:
+
+```bash
+node --check server.js
+node --check app.js
+```
+
+Для shell-скрипта:
+
+```bash
+bash -n deploy.sh
+```
+
+---
+
+## 🗺️ Идеи для развития
+
+- [ ] полноценное окно смены пароля вместо `prompt()`;
+- [ ] загрузка EPUB/PDF;
+- [ ] импорт книг через админ-панель;
+- [ ] обложки книг;
+- [ ] поиск и фильтры;
+- [ ] избранное;
+- [ ] синхронизация прогресса между устройствами;
+- [ ] резервное копирование JSON;
+- [ ] PWA/offline-режим.
+
+---
+
+<div align="center">
+
+### 🐴 Сделано для уютного чтения
+
+**Поняшина будка** · self-hosted · simple · atmospheric
+
+</div>
