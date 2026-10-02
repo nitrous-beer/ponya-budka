@@ -1,0 +1,22 @@
+[Unit]
+Description=Поняшина будка Node.js API
+After=network.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/budka
+ExecStart=/usr/bin/node /var/www/budka/server.js
+Restart=always
+RestartSec=2
+Environment=NODE_ENV=production
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=full
+ReadWritePaths=/var/lib/budka
+
+[Install]
+WantedBy=multi-user.target
