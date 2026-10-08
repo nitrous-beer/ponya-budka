@@ -1,0 +1,10 @@
+{
+  "name":"Поняшина будка",
+  "short_name":"Будка",
+  "start_url":"/",
+  "display":"standalone",
+  "background_color":"#071126",
+  "theme_color":"#675dff",
+  "lang":"ru",
+  "icons":[{"src":"/assets/budka-logo.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}

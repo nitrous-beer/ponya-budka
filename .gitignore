@@ -1,27 +1,13 @@
-# Runtime/server data — never commit these.
-data/books.json
-data/users.json
-books.json
-users.json
-
-# Secrets and private keys
 .env
-.env.*
 *.key
 *.pem
-*.p12
-*.pfx
-
-# Generated SSL
 *.crt
-
-# Logs / temporary files
 *.log
 *.tmp
-.tmp/
-
-# OS / editors
 .DS_Store
 Thumbs.db
 .vscode/
 .idea/
+books.json
+users.json
+data/

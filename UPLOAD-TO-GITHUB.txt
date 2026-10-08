@@ -1,0 +1,29 @@
+ПОНЯШИНА БУДКА — ГОТОВЫЙ ПАКЕТ
+
+1. Распакуйте архив.
+2. В GitHub откройте https://github.com/nitrous-beer/ponya-budka
+3. Замените содержимое репозитория файлами из этого каталога.
+4. Важно: не загружайте books.json/users.json — они создаются на сервере.
+5. После загрузки проверьте ветку main.
+6. На чистом Ubuntu/Debian:
+
+   curl -fsSL https://raw.githubusercontent.com/nitrous-beer/ponya-budka/main/deploy.sh | sudo bash
+
+Для полной установки с нуля на уже использовавшемся сервере:
+
+   sudo bash deploy.sh --uninstall --yes
+   sudo bash deploy.sh
+
+Проверка после установки:
+
+   systemctl status budka-api.service --no-pager
+   nginx -t
+   curl http://127.0.0.1:3000/api/health
+
+URL:
+   https://SERVER_IP:9443/
+
+Первичный вход:
+   admin / admin
+
+Сразу смените пароль.
