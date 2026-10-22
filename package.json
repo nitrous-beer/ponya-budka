@@ -1,0 +1,17 @@
+{
+  "name": "ponya-budka",
+  "version": "1.1.0",
+  "description": "Поняшина будка — интерактивная веб-читалка и библиотека (SQLite WAL, bcrypt, Rate-limit, PWA, Dashboard)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "check": "node --check server.js && node --check public/app.js && bash -n deploy.sh"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.8.1",
+    "bcryptjs": "^2.4.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

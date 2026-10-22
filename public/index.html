@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Поняшина будка — Книги. Миры. Приключения.</title>
+  
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#111723">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Comic+Neue:wght@700&family=Inter:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,600;1,400&family=M+PLUS+Rounded+1c:wght@500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body data-theme="anime">
+
+  <header>
+    <div class="brand-section">
+      <div class="brand-icon">
+        <i class="fa-solid fa-book-open" style="color: #fff; font-size: 1.2rem;"></i>
+      </div>
+      <div class="brand-text">
+        <h1>Поняшина будка</h1>
+        <p>Книги. Миры. Приключения.</p>
+      </div>
+    </div>
+
+    <div class="nav-tabs">
+      <button class="nav-tab-btn active"><i class="fa-solid fa-house"></i> Каталог</button>
+      <button class="nav-tab-btn" onclick="openEditorModal()"><i class="fa-solid fa-pen-nib"></i> Написать</button>
+      <button class="nav-tab-btn" onclick="openAdminModal()"><i class="fa-solid fa-gear"></i> Пользователи</button>
+    </div>
+
+    <div class="header-user-section">
+      <div class="icon-btn" title="Поиск"><i class="fa-solid fa-magnifying-glass"></i></div>
+      <div class="user-pill" onclick="openAuthModal()">
+        <div class="user-avatar-mini"><i class="fa-solid fa-user"></i></div>
+        <span id="headerUserName">admin</span>
+        <i class="fa-solid fa-chevron-down" style="font-size: 0.65rem; color: var(--text-muted);"></i>
+      </div>
+    </div>
+  </header>
+
+  <div class="app-layout">
+    <aside class="sidebar-left">
+      <div class="panel-header-title">
+        <i class="fa-solid fa-book-bookmark text-primary"></i> Библиотека
+      </div>
+
+      <div class="search-box">
+        <input type="text" id="bookSearchInput" placeholder="Поиск книг..." oninput="filterBooks()">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </div>
+
+      <div class="tags-container">
+        <button class="tag-btn active" onclick="setFilterGenre('all', this)">Все</button>
+        <button class="tag-btn" onclick="setFilterGenre('fantastic', this)">Фантастика</button>
+        <button class="tag-btn" onclick="setFilterGenre('fantasy', this)">Фэнтези</button>
+        <button class="tag-btn" onclick="setFilterGenre('adventure', this)">Приключения</button>
+        <button class="tag-btn" onclick="setFilterGenre('other', this)">Другое</button>
+      </div>
+
+      <div class="books-scroll-list" id="booksListContainer"></div>
+
+      <div class="sidebar-footer">
+        <span id="totalBooksCounter">Всего книг: 0</span>
+        <button class="btn-create-book" onclick="openEditorModal()">
+          <i class="fa-solid fa-pen"></i> Написать
+        </button>
+      </div>
+    </aside>
+
+    <main class="main-reader-panel">
+      <div class="reader-top-bar">
+        <div class="current-book-meta">
+          <div class="meta-cover"><i class="fa-solid fa-book"></i></div>
+          <div>
+            <div class="meta-title" id="activeBookTitle">Ветер в твоих волосах</div>
+            <div class="meta-author" id="activeBookAuthor">Ранобэ</div>
+          </div>
+        </div>
+
+        <div class="reader-page-stat-badge">
+          <span id="pageStatsLabel">Страница 1 из 1</span>
+          <div class="mini-progress-track">
+            <div class="mini-progress-fill" id="miniProgressFill"></div>
+          </div>
+        </div>
+
+        <div class="reader-top-tools">
+          <div class="icon-btn" onclick="toggleCurrentBookmark()" title="Закладка"><i class="fa-regular fa-bookmark" id="topBookmarkIcon"></i></div>
+          <div class="icon-btn" onclick="toggleFullScreen()" title="Во весь экран"><i class="fa-solid fa-expand"></i></div>
+        </div>
+      </div>
+
+      <div class="book-stage-wrapper">
+        <div class="book-volume">
+          <div class="book-spread-surface">
+            <div class="book-spine-divider"></div>
+
+            <div class="book-page-leaf page-left">
+              <div class="page-running-head">
+                <span id="headLeftTitle">Поняшина будка</span>
+                <span id="headLeftExtra">Глава 1</span>
+              </div>
+              <div class="page-body-text" id="leftPageText"></div>
+              <div class="page-running-foot" id="leftPageNum">1</div>
+            </div>
+
+            <div class="book-page-leaf page-right">
+              <div class="page-running-head">
+                <span id="headRightAuthor">Автор</span>
+                <span id="headRightTheme">Притон</span>
+              </div>
+              <div class="page-body-text" id="rightPageText"></div>
+              <div class="page-running-foot" id="rightPageNum">2</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="reader-controls-bar">
+        <button class="btn-nav-turn" onclick="prevSpread()"><i class="fa-solid fa-chevron-left"></i> Назад</button>
+        <input type="range" class="reader-slider-range" id="readerProgressRange" min="0" max="100" value="0" oninput="seekBySlider(this.value)">
+        <button class="btn-nav-turn" onclick="nextSpread()">Вперед <i class="fa-solid fa-chevron-right"></i></button>
+      </div>
+
+      <div class="bookmarks-bottom-panel">
+        <div class="bookmark-status-text">
+          <i class="fa-solid fa-bookmark"></i>
+          <span id="bookmarkSnippetText">У вас пока нет закладок в этой книге</span>
+        </div>
+        <button class="btn-add-bookmark" onclick="toggleCurrentBookmark()"><i class="fa-regular fa-bookmark"></i> Создать закладку</button>
+      </div>
+    </main>
+
+    <aside class="sidebar-right">
+      <div class="widget-panel-card">
+        <h3><i class="fa-solid fa-palette text-primary"></i> Темы оформления</h3>
+        <div class="theme-select-list">
+          <div class="theme-select-item" onclick="setAppTheme('stalker', this)">
+            <div class="theme-icon-wrap"><i class="fa-solid fa-radiation text-warning"></i></div>
+            <span>S.T.A.L.K.E.R. КПК</span>
+          </div>
+          <div class="theme-select-item" onclick="setAppTheme('skyrim', this)">
+            <div class="theme-icon-wrap"><i class="fa-solid fa-dragon"></i></div>
+            <span>TES Skyrim</span>
+          </div>
+          <div class="theme-select-item active" onclick="setAppTheme('anime', this)">
+            <div class="theme-icon-wrap"><i class="fa-solid fa-fan" style="color: #ec4899;"></i></div>
+            <span>Аниме / Ранобэ</span>
+          </div>
+          <div class="theme-select-item" onclick="setAppTheme('comic', this)">
+            <div class="theme-icon-wrap"><i class="fa-solid fa-bolt" style="color: #f59e0b;"></i></div>
+            <span>Комикс / Pop-Art</span>
+          </div>
+          <div class="theme-select-item" onclick="setAppTheme('sepia', this)">
+            <div class="theme-icon-wrap"><i class="fa-solid fa-scroll" style="color: #d97706;"></i></div>
+            <span>Классика</span>
+          </div>
+          <div class="theme-select-item" onclick="setAppTheme('dark', this)">
+            <div class="theme-icon-wrap"><i class="fa-solid fa-moon"></i></div>
+            <span>Ночной режим</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="widget-panel-card">
+        <h3><i class="fa-solid fa-sliders"></i> Колонтитулы</h3>
+        <div class="toggle-row">
+          <span>Показывать заголовок</span>
+          <label class="switch-toggle">
+            <input type="checkbox" id="toggleHeadTitle" checked onchange="updateHeaderVisibility()">
+            <span class="slider-toggle"></span>
+          </label>
+        </div>
+        <div class="toggle-row">
+          <span>Показывать автора</span>
+          <label class="switch-toggle">
+            <input type="checkbox" id="toggleHeadAuthor" checked onchange="updateHeaderVisibility()">
+            <span class="slider-toggle"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="widget-panel-card">
+        <h3><i class="fa-solid fa-dice-d20" style="color:#818cf8;"></i> Аперитив</h3>
+        <div class="fun-segmented-tabs">
+          <button class="fun-segmented-btn" id="tabMagicBallBtn" onclick="switchFunTab('ball')">Магический шар</button>
+          <button class="fun-segmented-btn active" id="tabDiceBtn" onclick="switchFunTab('dice')">Кубики</button>
+        </div>
+
+        <div id="diceSection">
+          <div class="fun-dice-preview-box">
+            <div class="dice-mini-block active" id="block2d6" onclick="selectDiceMode('2d6')"><i class="fa-solid fa-dice"></i> 2d6</div>
+            <div class="dice-mini-block" id="blockD20" onclick="selectDiceMode('d20')"><i class="fa-solid fa-dice-d20"></i> d20</div>
+          </div>
+          <button class="btn-action-fun" onclick="executeRoll()"><i class="fa-solid fa-dice"></i> Бросить</button>
+          <div class="fun-result-label" id="funResultLabel">🎲 Результат: 7</div>
+        </div>
+
+        <div id="ballSection" style="display: none; text-align: center;">
+          <div style="font-size: 0.85rem; color: #a5b4fc; margin-bottom: 12px; min-height: 40px; display: flex; align-items: center; justify-content: center;" id="magicBallAnswer">
+            «Спросите у шара...»
+          </div>
+          <button class="btn-action-fun" onclick="shakeBall()"><i class="fa-solid fa-circle-question"></i> Спросить шар 8</button>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="toast-msg" id="toastMsg">Готово</div>
+
+  <!-- Модалка редактора -->
+  <div class="modal-overlay" id="editorModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-pen-nib"></i> Создание произведения</h3>
+        <button class="modal-close" onclick="closeModals()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Название книги</label>
+          <input type="text" class="form-control" id="editBookTitle" placeholder="Введите название...">
+        </div>
+        <div class="form-group">
+          <label>Автор</label>
+          <input type="text" class="form-control" id="editBookAuthor" placeholder="Укажите автора...">
+        </div>
+        <div class="form-group">
+          <label>Жанр книги</label>
+          <select class="form-control" id="editBookGenre">
+            <option value="fantastic">Фантастика</option>
+            <option value="fantasy">Фэнтези</option>
+            <option value="adventure">Приключения</option>
+            <option value="other">Другое</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Текст произведения (разделитель глав — "### Заголовок")</label>
+          <textarea class="form-control" id="editBookContent" placeholder="Текст книги..."></textarea>
+        </div>
+        <button class="btn-action-fun" onclick="saveBookToServer()"><i class="fa-solid fa-floppy-disk"></i> Сохранить в SQLite</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модалка авторизации -->
+  <div class="modal-overlay" id="authModal">
+    <div class="modal-content" style="max-width: 400px;">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-user-shield"></i> Профиль</h3>
+        <button class="modal-close" onclick="closeModals()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Логин</label>
+          <input type="text" class="form-control" id="authUsernameInput" value="admin">
+        </div>
+        <div class="form-group">
+          <label>Пароль</label>
+          <input type="password" class="form-control" id="authPasswordInput" placeholder="••••••••">
+        </div>
+        <button class="btn-action-fun" onclick="loginSubmit()">Войти в аккаунт</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модалка пользователей -->
+  <div class="modal-overlay" id="adminModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-users-gear"></i> Пользователи</h3>
+        <button class="modal-close" onclick="closeModals()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:12px;">Текущий профиль: <strong id="currentUserBadge">admin</strong></p>
+        <button class="btn-action-fun" onclick="closeModals()">Закрыть</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

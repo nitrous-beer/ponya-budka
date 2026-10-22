@@ -1,0 +1,17 @@
+name: Syntax and Lint Check
+on: [push, pull_request]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Syntax Check
+        run: |
+          node --check server.js
+          node --check public/app.js
+          node --check public/sw.js
+          bash -n deploy.sh

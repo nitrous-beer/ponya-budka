@@ -1,0 +1,16 @@
+{
+  "name": "Поняшина будка",
+  "short_name": "Будка",
+  "description": "Интерактивная библиотека и читалка электронных книг",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0c1017",
+  "theme_color": "#111723",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%236366f1'/><text x='50' y='65' font-size='45' text-anchor='middle' fill='white'>📖</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    }
+  ]
+}
